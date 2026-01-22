@@ -13,6 +13,7 @@ return new class extends Migration
             $table->string('nama_lengkap');
             $table->string('email')->unique();
             $table->string('password');
+            $table->rememberToken();
             $table->enum('role', ['admin'])->default('admin');
             $table->timestamp('terakhir_login')->nullable();
             $table->timestamps();

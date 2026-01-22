@@ -15,6 +15,7 @@ return new class extends Migration
             $table->string('nama_sekolah');
             $table->string('email')->unique();
             $table->string('nomor_wa');
+            $table->rememberToken();
             $table->string('password');
             $table->enum('role', ['kordinator_sekolah'])->default('kordinator_sekolah');
             $table->timestamps();

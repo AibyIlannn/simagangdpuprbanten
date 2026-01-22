@@ -5,25 +5,37 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class PesertaMagang extends Model
+class PengajuanMagang extends Model
 {
     use HasFactory;
 
-    protected $table = 'peserta_magang';
+    protected $table = 'pengajuan_magang';
 
     protected $fillable = [
-        'pengajuan_id',
-        'nama_siswa',
-        'nisn',
-        'kelas',
+        'kordinator_id',
+        'jenis_kegiatan',
+        'tanggal_mulai',
+        'tanggal_selesai',
+        'jumlah_siswa',
+        'bidang_unit',
+        'dokumen_path',
+        'status',
+        'keterangan',
     ];
 
     protected $casts = [
+        'tanggal_mulai' => 'date',
+        'tanggal_selesai' => 'date',
         'created_at' => 'datetime',
     ];
 
-    public function pengajuanMagang()
+    public function kordinator()
     {
-        return $this->belongsTo(PengajuanMagang::class, 'pengajuan_id');
+        return $this->belongsTo(Kordinator::class, 'kordinator_id');
+    }
+
+    public function pesertaMagang()
+    {
+        return $this->hasMany(PesertaMagang::class, 'pengajuan_id');
     }
 }

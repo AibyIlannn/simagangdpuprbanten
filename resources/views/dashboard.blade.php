@@ -109,22 +109,22 @@
             <div class="stats-grid">
                 <div class="stat-card warning">
                     <div class="stat-label">Pengajuan Pending</div>
-                    <div class="stat-value">{{ \App\Models\PengajuanMagang::where('status', 'pending')->count() }}</div>
+                    <div class="stat-value">{{ $stats['pending'] }}</div>
                 </div>
                 
                 <div class="stat-card success">
                     <div class="stat-label">Pengajuan ACC</div>
-                    <div class="stat-value">{{ \App\Models\PengajuanMagang::where('status', 'acc')->count() }}</div>
+                    <div class="stat-value">{{ $stats['acc'] }}</div>
                 </div>
                 
                 <div class="stat-card danger">
                     <div class="stat-label">Pengajuan Reject</div>
-                    <div class="stat-value">{{ \App\Models\PengajuanMagang::where('status', 'reject')->count() }}</div>
+                    <div class="stat-value">{{ $stats['reject'] }}</div>
                 </div>
                 
                 <div class="stat-card">
                     <div class="stat-label">Total Sekolah</div>
-                    <div class="stat-value">{{ \App\Models\Kordinator::count() }}</div>
+                    <div class="stat-value">{{ $stats['total_sekolah'] }}</div>
                 </div>
             </div>
             
@@ -143,13 +143,6 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @php
-                            $recentPengajuan = \App\Models\PengajuanMagang::with('kordinator')
-                                ->latest()
-                                ->take(10)
-                                ->get();
-                        @endphp
-                        
                         @forelse($recentPengajuan as $pengajuan)
                         <tr>
                             <td>{{ $pengajuan->kordinator->nama_sekolah }}</td>

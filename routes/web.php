@@ -6,7 +6,7 @@ use App\Http\Controllers\RegisterController;
 
 // Halaman Publik (Landing Page)
 Route::get('/', function () {
-    return view('welcome'); // atau view('index')
+    return view('welcome');
 });
 
 // Authentication Routes
@@ -18,60 +18,72 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/daftar', [RegisterController::class, 'showRegisterForm'])->name('register');
 Route::post('/daftar', [RegisterController::class, 'register'])->name('register.submit');
 
-// Protected Routes - SuperAdmin Only
-Route::middleware(['role:superadmin'])->prefix('dashboard')->group(function () {
+// Protected Routes - SuperAdmin & Admin (Gabungan)
+Route::middleware(['role:superadmin,admin'])->prefix('dashboard')->group(function () {
+    
+    // Dashboard Utama
     Route::get('/', function () {
-        return view('dashboard.index');
+        $stats = [
+            'pending' => \App\Models\PengajuanMagang::where('status', 'pending')->count(),
+            'acc' => \App\Models\PengajuanMagang::where('status', 'acc')->count(),
+            'reject' => \App\Models\PengajuanMagang::where('status', 'reject')->count(),
+            'total_sekolah' => \App\Models\Kordinator::count(),
+        ];
+        
+        $recentPengajuan = \App\Models\PengajuanMagang::with('kordinator')
+            ->latest()
+            ->take(10)
+            ->get();
+        
+        return view('dashboard', compact('stats', 'recentPengajuan'));
     })->name('dashboard');
 
-    // User Management - SuperAdmin Only
-    Route::prefix('admin')->group(function () {
-        Route::get('/', function () {
-            return view('dashboard.admin.index');
+    // Kelola Admin - SuperAdmin Only
+    Route::middleware(['role:superadmin'])->group(function () {
+        Route::get('/admin', function () {
+            return view('dashboard.admin');
         })->name('dashboard.admin');
+    });
+
+    // Halaman yang bisa diakses Admin & SuperAdmin
+    Route::prefix('admin')->group(function () {
+        Route::get('/validasi', function () {
+            $pengajuanList = \App\Models\PengajuanMagang::with(['kordinator', 'pesertaMagang'])
+                ->whereIn('status', ['pending', 'reject'])
+                ->latest()
+                ->get();
+            
+            return view('dashboard.admin.validasi', compact('pengajuanList'));
+        })->name('dashboard.admin.validasi');
 
         Route::get('/sekolah', function () {
-            return view('dashboard.admin.sekolah');
+            $kordinators = \App\Models\Kordinator::whereHas('pengajuanMagang', function($query) {
+                $query->where('status', 'acc');
+            })->with(['pengajuanMagang' => function($query) {
+                $query->where('status', 'acc');
+            }])->get();
+            
+            return view('dashboard.admin.sekolah', compact('kordinators'));
         })->name('dashboard.admin.sekolah');
 
         Route::get('/peserta', function () {
-            return view('dashboard.admin.peserta');
+            $peserta = \App\Models\PesertaMagang::with(['pengajuanMagang.kordinator'])
+                ->whereHas('pengajuanMagang', function($query) {
+                    $query->where('status', 'acc');
+                })
+                ->get();
+            
+            return view('dashboard.admin.peserta', compact('peserta'));
         })->name('dashboard.admin.peserta');
-    });
-
-    // Management - SuperAdmin Only
-    Route::get('/admin/dokumen', function () {
-        return view('dashboard.admin.dokumen');
-    })->name('dashboard.admin.dokumen');
-
-    Route::get('/admin/validasi', function () {
-        return view('dashboard.admin.validasi');
-    })->name('dashboard.admin.validasi');
-});
-
-// Protected Routes - SuperAdmin & Admin
-Route::middleware(['role:superadmin,admin'])->prefix('dashboard')->group(function () {
-    Route::get('/', function () {
-        return view('dashboard.index');
-    })->name('dashboard.index');
-
-    // Admin dapat akses sekolah, peserta, dokumen, validasi
-    Route::prefix('admin')->group(function () {
-        Route::get('/sekolah', function () {
-            return view('dashboard.admin.sekolah');
-        })->name('dashboard.sekolah');
-
-        Route::get('/peserta', function () {
-            return view('dashboard.admin.peserta');
-        })->name('dashboard.peserta');
 
         Route::get('/dokumen', function () {
-            return view('dashboard.admin.dokumen');
-        })->name('dashboard.dokumen');
-
-        Route::get('/validasi', function () {
-            return view('dashboard.admin.validasi');
-        })->name('dashboard.validasi');
+            $dokumen = \App\Models\PengajuanMagang::with('kordinator')
+                ->where('status', 'acc')
+                ->latest()
+                ->get();
+            
+            return view('dashboard.admin.dokumen', compact('dokumen'));
+        })->name('dashboard.admin.dokumen');
     });
 });
 
