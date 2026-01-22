@@ -30,7 +30,7 @@
                 scrolled = window.pageYOffset > 50;
             ">
         <nav role="navigation" aria-label="Main Navigation">
-            <a href="{{ url('/') }}" class="logo-section">
+            <a href="{{ url('/masuk') }}" class="logo-section">
                 <h3>SIMAGANG</h3>
                 <small>Sistem Informasi Magang DPUPR Banten</small>
             </a>

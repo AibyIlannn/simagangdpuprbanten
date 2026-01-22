@@ -90,11 +90,10 @@
                                 type="email" 
                                 id="email" 
                                 class="form-input"
-                                placeholder="nama@sekolah.sch.id"
+                                placeholder="email@example.com"
                                 x-model="formData.email"
                                 required
                             >
-                            <small class="form-hint">Gunakan email resmi sekolah</small>
                         </div>
                         
                         <div class="form-group">
