@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\RegisterController;
+use App\Http\Controllers\Admin\ValidasiController;
 
 // Halaman Publik (Landing Page)
 Route::get('/', function () {
@@ -47,14 +48,20 @@ Route::middleware(['role:superadmin,admin'])->prefix('dashboard')->group(functio
 
     // Halaman yang bisa diakses Admin & SuperAdmin
     Route::prefix('admin')->group(function () {
-        Route::get('/validasi', function () {
-            $pengajuanList = \App\Models\PengajuanMagang::with(['kordinator', 'pesertaMagang'])
-                ->whereIn('status', ['pending', 'reject'])
-                ->latest()
-                ->get();
-            
-            return view('dashboard.admin.validasi', compact('pengajuanList'));
-        })->name('dashboard.admin.validasi');
+        
+        // ===== VALIDASI ROUTES (FIXED) =====
+        Route::get('/validasi', [ValidasiController::class, 'index'])
+            ->name('dashboard.admin.validasi');
+        
+        Route::post('/validasi/approve', [ValidasiController::class, 'approve'])
+            ->name('dashboard.admin.validasi.approve');
+        
+        Route::post('/validasi/reject', [ValidasiController::class, 'reject'])
+            ->name('dashboard.admin.validasi.reject');
+        
+        Route::post('/validasi/bulk', [ValidasiController::class, 'bulkAction'])
+            ->name('dashboard.admin.validasi.bulk');
+        // ===== END VALIDASI =====
 
         Route::get('/sekolah', function () {
             $kordinators = \App\Models\Kordinator::whereHas('pengajuanMagang', function($query) {

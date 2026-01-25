@@ -21,28 +21,6 @@
     <link rel="stylesheet" href="{{ asset('css/masuk.css') }}">
 </head>
 <body>
-    <header x-data="{ 
-        scrolled: false, 
-        lastScroll: 0
-    }" 
-            :class="{ 'scrolled': scrolled }"
-            @scroll.window="
-                scrolled = window.pageYOffset > 50;
-            ">
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="{{ url('/masuk') }}" class="logo-section">
-                <h3>SIMAGANG</h3>
-                <small>Sistem Informasi Magang DPUPR Banten</small>
-            </a>
-            
-            <div class="nav-actions">
-                <a href="{{ url('/') }}" class="btn btn-outline" aria-label="Kembali ke Beranda">
-                    <i class="fas fa-arrow-left" style="margin-right: 0.5rem;"></i>Beranda
-                </a>
-            </div>
-        </nav>
-    </header>
-    
     <div class="main-content">
         <div class="login-container" x-data="loginApp()">
             <div class="login-card">
@@ -119,7 +97,7 @@
                     
                     <!-- Form Footer: Remember Me & Forgot Password -->
                     <div class="form-footer">
-                        <div class="remember-me">
+                        <div style="opacity:0;" class="remember-me">
                             <input 
                                 type="checkbox" 
                                 id="remember" 

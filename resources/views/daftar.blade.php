@@ -15,8 +15,9 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Alpine.js -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <link rel="stylesheet" href="{{ asset('css/daftar.css') }}">
 </head>
@@ -104,10 +105,9 @@
                                 class="form-input"
                                 placeholder="628xxxxxxxxxx"
                                 x-model="formData.nomor_wa"
-                                pattern="628[0-9]{9,11}"
+                                pattern="^(628[0-9]{9,11}|08[0-9]{9,11})$"
                                 required
                             >
-                            <small class="form-hint">gunakan nomor dengan kode negara +62</small>
                         </div>
                         
                         <div class="form-group">
@@ -117,9 +117,9 @@
                                     :type="showPassword ? 'text' : 'password'" 
                                     id="password" 
                                     class="form-input"
-                                    placeholder="Minimal 8 karakter"
+                                    placeholder="Masukan password"
                                     x-model="formData.password"
-                                    minlength="8"
+                                    minlength="4"
                                     required
                                 >
                                 <button 
@@ -203,37 +203,6 @@
                             </div>
                         </div>
                         
-                        <div class="form-group">
-                            <label for="jumlah_siswa" class="form-label required">Jumlah Siswa yang Diajukan</label>
-                            <input 
-                                type="number" 
-                                id="jumlah_siswa" 
-                                class="form-input"
-                                placeholder="Masukkan jumlah siswa"
-                                x-model.number="formData.jumlah_siswa"
-                                min="1"
-                                max="50"
-                                required
-                                @change="updateParticipantsCount"
-                            >
-                            <small class="form-hint">Maksimal 50 siswa per pengajuan</small>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="bidang_unit" class="form-label required">Bidang Unit Tujuan</label>
-                            <select 
-                                id="bidang_unit" 
-                                class="form-select"
-                                x-model="formData.bidang_unit"
-                                required
-                            >
-                                <option value="">Pilih Bidang Unit</option>
-                                <option value="Bidang Teknik">Bidang Teknik</option>
-                                <option value="Administrasi">Administrasi</option>
-                                <option value="IT & Digital">IT & Digital</option>
-                            </select>
-                        </div>
-                        
                         <div class="form-actions">
                             <button type="button" class="btn btn-secondary" @click="previousStep">
                                 <i class="fa-solid fa-arrow-left"></i>
@@ -304,6 +273,21 @@
                                             >
                                         </div>
                                     </div>
+
+                                    <div class="form-group">
+                                        <label :for="'bidang_unit_' + index" class="form-label required" style="color:#121212">Bidang Unit Tujuan</label>
+                                        <select 
+                                            :id="'bidang_unit_' + index"
+                                            class="form-select"
+                                            x-model="participant.bidang_unit"
+                                            required
+                                        >
+                                            <option value="">Pilih Bidang Unit</option>
+                                            <option value="Bidang Teknik">Bidang Teknik</option>
+                                            <option value="Administrasi">Administrasi</option>
+                                            <option value="IT & Digital">IT & Digital</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </template>
                         </div>
@@ -312,7 +296,7 @@
                             type="button" 
                             class="btn-add"
                             @click="addParticipant"
-                            x-show="formData.participants.length < formData.jumlah_siswa"
+                            x-show="formData.participants.length < 50"
                         >
                             <i class="fa-solid fa-plus"></i>
                             Tambah Siswa
@@ -379,6 +363,9 @@
                                 <template x-if="!isLoading">
                                     <span>Kirim Pengajuan Magang Resmi</span>
                                 </template>
+                                <template x-if="isLoading">
+                                    <span><i class="fa-solid fa-spinner fa-spin"></i> Mengirim...</span>
+                                </template>
                             </button>
                         </div>
                     </form>
@@ -410,9 +397,12 @@
         <p>&copy; 2026 DPUPR Provinsi Banten. Platform Sistem Informasi Magang.</p>
     </footer>
     
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
     <script>
-        function registerApp() {
-            return {
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('registerApp', () => ({
                 currentStep: 1,
                 isLoading: false,
                 isSubmitted: false,
@@ -443,10 +433,8 @@
                     jenis_kegiatan: 'PKL / Prakerin',
                     tanggal_mulai: '',
                     tanggal_selesai: '',
-                    jumlah_siswa: 1,
-                    bidang_unit: '',
                     participants: [
-                        { nama_siswa: '', nisn: '', kelas: ''}
+                        { nama_siswa: '', nisn: '', kelas: '', bidang_unit: '' }
                     ],
                     document: null,
                     documentName: ''
@@ -455,21 +443,33 @@
                 nextStep() {
                     if (this.currentStep === 1) {
                         if (this.formData.password !== this.formData.password_confirmation) {
-                            alert('Password dan konfirmasi password tidak sama!');
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Password Tidak Cocok',
+                                text: 'Password dan konfirmasi password tidak sama!',
+                                confirmButtonColor: '#f97316'
+                            });
                             return;
                         }
-                        if (this.formData.password.length < 8) {
-                            alert('Password minimal 8 karakter!');
+                        if (this.formData.password.length < 4) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Password Terlalu Pendek',
+                                text: 'Password minimal 4 karakter!',
+                                confirmButtonColor: '#f97316'
+                            });
                             return;
                         }
                     }
                     
                     if (this.currentStep === 3) {
-                        const requiredCount = this.formData.jumlah_siswa;
-                        const currentCount = this.formData.participants.length;
-                        
-                        if (currentCount < requiredCount) {
-                            alert(`Anda perlu menambahkan ${requiredCount - currentCount} siswa lagi sesuai jumlah yang diajukan.`);
+                        if (this.formData.participants.length === 0) {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Data Siswa Kosong',
+                                text: 'Anda harus menambahkan minimal 1 siswa untuk melanjutkan.',
+                                confirmButtonColor: '#f97316'
+                            });
                             return;
                         }
                     }
@@ -487,36 +487,62 @@
                     }
                 },
                 
-                updateParticipantsCount() {
-                    const targetCount = this.formData.jumlah_siswa;
-                    const currentCount = this.formData.participants.length;
-                    
-                    if (targetCount > currentCount) {
-                        for (let i = currentCount; i < targetCount; i++) {
-                            this.formData.participants.push({
-                                nama_siswa: '',
-                                nisn: '',
-                                kelas: ''
-                            });
-                        }
-                    } else if (targetCount < currentCount) {
-                        this.formData.participants = this.formData.participants.slice(0, targetCount);
-                    }
-                },
-                
                 addParticipant() {
-                    if (this.formData.participants.length < this.formData.jumlah_siswa) {
+                    if (this.formData.participants.length < 50) {
                         this.formData.participants.push({
                             nama_siswa: '',
                             nisn: '',
-                            kelas: ''
+                            kelas: '',
+                            bidang_unit: ''
+                        });
+                        
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Siswa Ditambahkan',
+                            text: `Total siswa: ${this.formData.participants.length}`,
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Batas Maksimal',
+                            text: 'Maksimal 50 siswa per pengajuan',
+                            confirmButtonColor: '#f97316'
                         });
                     }
                 },
                 
                 removeParticipant(index) {
                     if (this.formData.participants.length > 1) {
-                        this.formData.participants.splice(index, 1);
+                        Swal.fire({
+                            title: 'Hapus Data Siswa?',
+                            text: 'Data siswa ini akan dihapus dari daftar',
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#dc2626',
+                            cancelButtonColor: '#6b7280',
+                            confirmButtonText: 'Ya, Hapus',
+                            cancelButtonText: 'Batal'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                this.formData.participants.splice(index, 1);
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Terhapus!',
+                                    text: 'Data siswa berhasil dihapus',
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                });
+                            }
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Tidak Dapat Dihapus',
+                            text: 'Minimal harus ada 1 siswa dalam pengajuan',
+                            confirmButtonColor: '#f97316'
+                        });
                     }
                 },
                 
@@ -525,23 +551,56 @@
                     
                     if (file) {
                         if (file.type !== 'application/pdf') {
-                            alert('File harus berformat PDF!');
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Format File Salah',
+                                text: 'File harus berformat PDF!',
+                                confirmButtonColor: '#f97316'
+                            });
                             event.target.value = '';
                             return;
                         }
                         
                         if (file.size > 5 * 1024 * 1024) {
-                            alert('Ukuran file maksimal 5MB!');
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'File Terlalu Besar',
+                                text: 'Ukuran file maksimal 5MB!',
+                                confirmButtonColor: '#f97316'
+                            });
                             event.target.value = '';
                             return;
                         }
                         
                         this.formData.document = file;
                         this.formData.documentName = file.name;
+                        
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'File Berhasil Dipilih',
+                            text: file.name,
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
                     }
                 },
                 
                 async submitForm() {
+                    const totalSiswa = this.formData.participants.length;
+                    
+                    const result = await Swal.fire({
+                        title: 'Kirim Pengajuan Magang?',
+                        html: `Anda akan mengirim pengajuan untuk <strong>${totalSiswa} siswa</strong>.<br>Pastikan semua data sudah benar.`,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#f97316',
+                        cancelButtonColor: '#6b7280',
+                        confirmButtonText: 'Ya, Kirim',
+                        cancelButtonText: 'Periksa Lagi'
+                    });
+                    
+                    if (!result.isConfirmed) return;
+                    
                     this.isLoading = true;
                     
                     const formDataToSend = new FormData();
@@ -559,14 +618,14 @@
                     formDataToSend.append('jenis_kegiatan', this.formData.jenis_kegiatan);
                     formDataToSend.append('tanggal_mulai', this.formData.tanggal_mulai);
                     formDataToSend.append('tanggal_selesai', this.formData.tanggal_selesai);
-                    formDataToSend.append('jumlah_siswa', this.formData.jumlah_siswa);
-                    formDataToSend.append('bidang_unit', this.formData.bidang_unit);
+                    formDataToSend.append('jumlah_siswa', this.formData.participants.length);
                     
                     // Step 3 Data
                     this.formData.participants.forEach((participant, index) => {
                         formDataToSend.append(`participants[${index}][nama_siswa]`, participant.nama_siswa);
                         formDataToSend.append(`participants[${index}][nisn]`, participant.nisn);
                         formDataToSend.append(`participants[${index}][kelas]`, participant.kelas);
+                        formDataToSend.append(`participants[${index}][bidang_unit]`, participant.bidang_unit);
                     });
                     
                     // Step 4 Data
@@ -586,20 +645,36 @@
                         const result = await response.json();
                         
                         if (result.success) {
+                            await Swal.fire({
+                                icon: 'success',
+                                title: 'Pengajuan Berhasil!',
+                                text: 'Pengajuan magang Anda telah diterima dan akan segera diproses',
+                                confirmButtonColor: '#10b981'
+                            });
                             this.isSubmitted = true;
                             window.scrollTo({ top: 0, behavior: 'smooth' });
                         } else {
-                            alert(result.message || 'Terjadi kesalahan saat mendaftar.');
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Pengajuan Gagal',
+                                text: result.message || 'Terjadi kesalahan saat mendaftar. Silakan coba lagi.',
+                                confirmButtonColor: '#dc2626'
+                            });
                         }
                     } catch (error) {
                         console.error('Error:', error);
-                        alert('Terjadi kesalahan saat mengirim data.');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Koneksi Gagal',
+                            text: 'Terjadi kesalahan saat mengirim data. Periksa koneksi internet Anda.',
+                            confirmButtonColor: '#dc2626'
+                        });
                     } finally {
                         this.isLoading = false;
                     }
                 }
-            }
-        }
+            }));
+        });
     </script>
 </body>
 </html>

@@ -52,36 +52,19 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer">
     
-    <!-- Alpine.js -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    
     <!-- Styles -->
     <link rel="stylesheet" href="{{ asset('css/index.css') }}">
 </head>
 <body>
-    <header x-data="{ 
-        scrolled: false, 
-        lastScroll: 0, 
-        hidden: false,
-        mobileMenuOpen: false,
-        layananOpen: false
-    }" 
-            :class="{ 'scrolled': scrolled, 'hidden': hidden }"
-            @scroll.window="
-                scrolled = window.pageYOffset > 50;
-                if (window.pageYOffset > lastScroll && window.pageYOffset > 200) {
-                    hidden = true;
-                } else {
-                    hidden = false;
-                }
-                lastScroll = window.pageYOffset;
-            ">
+    <!-- Header -->
+    <header id="mainHeader">
         <nav role="navigation" aria-label="Main Navigation">
             <div class="logo-section">
                 <h3>SIMAGANG</h3>
                 <small>Sistem Informasi Magang DPUPR Banten</small>
             </div>
             
+            <!-- Desktop Navigation -->
             <div class="nav-desktop">
                 @auth('superadmin')
                     <a href="{{ url('/dashboard') }}" class="btn btn-outline" aria-label="Dashboard SuperAdmin">
@@ -101,67 +84,77 @@
                 @endauth
             </div>
             
-            <button class="hamburger-btn" @click="mobileMenuOpen = true" aria-label="Menu">
+            <!-- Mobile Hamburger Button -->
+            <button class="hamburger-btn" 
+                    id="hamburgerBtn"
+                    aria-label="Buka Menu" 
+                    aria-expanded="false">
                 <i class="fas fa-bars"></i>
             </button>
         </nav>
         
-        <div class="menu-overlay" :class="{ 'active': mobileMenuOpen }" @click="mobileMenuOpen = false"></div>
-        
-        <div class="mobile-menu" :class="{ 'active': mobileMenuOpen }">
+        <!-- Mobile Menu -->
+        <div class="mobile-menu" id="mobileMenu">
             <div class="mobile-menu-header">
                 <h4>Menu</h4>
-                <button class="close-btn" @click="mobileMenuOpen = false" aria-label="Close Menu">
+                <button class="close-btn" 
+                        id="closeMenuBtn"
+                        aria-label="Tutup Menu">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             
             <div class="mobile-menu-content">
                 <div class="mobile-menu-item">
-                    <a href="{{ url('/') }}" class="mobile-menu-link" @click="mobileMenuOpen = false">Beranda</a>
+                    <a href="{{ url('/') }}" class="mobile-menu-link">Beranda</a>
                 </div>
                 
                 <div class="mobile-dropdown">
-                    <button class="dropdown-trigger" @click="layananOpen = !layananOpen">
+                    <button class="dropdown-trigger" id="dropdownTrigger" aria-expanded="false">
                         <span>Layanan</span>
-                        <i class="fas fa-chevron-down dropdown-icon" :class="{ 'rotated': layananOpen }"></i>
+                        <i class="fas fa-chevron-down dropdown-icon"></i>
                     </button>
-                    <div class="dropdown-content" :class="{ 'active': layananOpen }">
-                        <a href="{{ url('/daftar') }}" class="dropdown-item" @click="mobileMenuOpen = false">Pendaftaran Peserta Magang</a>
-                        <a href="{{ url('/verification') }}" class="dropdown-item" @click="mobileMenuOpen = false">Informasi Pendaftaran</a>
+                    <div class="dropdown-content" id="dropdownContent">
+                        <a href="{{ url('/daftar') }}" class="dropdown-item">Pendaftaran Peserta Magang</a>
+                        <a href="{{ url('/verification') }}" class="dropdown-item">Informasi Pendaftaran</a>
                     </div>
                 </div>
                 
                 <div class="mobile-menu-item">
-                    <a href="#footer" class="mobile-menu-link" @click="mobileMenuOpen = false">Kontak</a>
+                    <a href="#footer" class="mobile-menu-link">Kontak</a>
                 </div>
                 
                 <div class="mobile-menu-actions">
                     @auth('superadmin')
-                        <a href="{{ url('/dashboard') }}" class="btn btn-primary" @click="mobileMenuOpen = false">
+                        <a href="{{ url('/dashboard') }}" class="btn btn-primary">
                             <i class="fas fa-tachometer-alt" style="margin-right: 0.5rem;"></i>Dashboard
                         </a>
                     @elseauth('admin')
-                        <a href="{{ url('/dashboard') }}" class="btn btn-primary" @click="mobileMenuOpen = false">
+                        <a href="{{ url('/dashboard') }}" class="btn btn-primary">
                             <i class="fas fa-tachometer-alt" style="margin-right: 0.5rem;"></i>Dashboard
                         </a>
                     @elseauth('kordinator')
-                        <a href="{{ url('/verification') }}" class="btn btn-primary" @click="mobileMenuOpen = false">
+                        <a href="{{ url('/verification') }}" class="btn btn-primary">
                             <i class="fas fa-tachometer-alt" style="margin-right: 0.5rem;"></i>Dashboard
                         </a>
                     @else
-                        <a href="{{ url('/daftar') }}" class="btn btn-outline-mobile" @click="mobileMenuOpen = false">Daftar</a>
-                        <a href="{{ url('/masuk') }}" class="btn btn-primary" @click="mobileMenuOpen = false">Masuk</a>
+                        <a href="{{ url('/daftar') }}" class="btn btn-outline-mobile">Daftar</a>
+                        <a href="{{ url('/masuk') }}" class="btn btn-primary">Masuk</a>
                     @endauth
                 </div>
             </div>
         </div>
+        
+        <!-- Overlay -->
+        <div class="menu-overlay" id="menuOverlay" aria-hidden="true"></div>
     </header>
 
+    <!-- Main Content -->
     <main>
         <section class="hero" aria-labelledby="hero-heading">
             <div class="container">
                 <div class="hero-grid">
+                    <!-- Hero Left Content -->
                     <div class="hero-left">
                         <article class="hero-content fade-in-up">
                             <h1 id="hero-heading">Wujudkan Pengalaman Magang Berkualitas untuk Generasi Banten</h1>
@@ -170,30 +163,29 @@
                             </a>
                         </article>
 
+                        <!-- Info Cards -->
                         <div class="info-cards fade-in-up">
                             <article class="info-card">
                                 <h3 class="info-card-title">Bidang Teknik</h3>
                                 <p class="info-card-subtitle">Pengalaman langsung di proyek infrastruktur</p>
                                 <div class="info-card-price">100+ Kuota</div>
-                                <button class="btn info-card-btn" aria-label="Lihat detail program bidang teknik">Lihat Detail</button>
                             </article>
 
                             <article class="info-card stell">
                                 <h3 class="info-card-title">Administrasi</h3>
                                 <p class="info-card-subtitle">Kelola dokumen dan sistem pemerintahan</p>
                                 <div class="info-card-price">75+ Kuota</div>
-                                <button class="btn info-card-btn" aria-label="Lihat detail program administrasi">Lihat Detail</button>
                             </article>
 
                             <article class="info-card">
                                 <h3 class="info-card-title">IT &amp; Digital</h3>
                                 <p class="info-card-subtitle">Teknologi informasi modern</p>
                                 <div class="info-card-price">50+ Kuota</div>
-                                <button class="btn info-card-btn" aria-label="Lihat detail program IT dan Digital">Lihat Detail</button>
                             </article>
                         </div>
                     </div>
 
+                    <!-- Registration Card -->
                     <aside class="registration-card fade-in-up" aria-labelledby="registration-heading">
                         <h2 id="registration-heading">Program Magang DPUPR Provinsi Banten</h2>
                         <p class="subtitle">Wujudkan pengalaman magang berkualitas dan terstruktur untuk siswa-siswi terbaik</p>
@@ -249,25 +241,40 @@
         </section>
     </main>
 
+    <!-- Footer -->
     <footer id="footer">
         <div class="container">
             <div class="footer-content">
+                <!-- Footer Brand -->
                 <div class="footer-brand">
                     <h3>SIMAGANG</h3>
                     <p>Platform resmi penyedia ruang magang dan PKL untuk meningkatkan kompetensi siswa</p>
                     <div class="social-links">
-                        <a href="https://instagram.com/dpupr.banten" class="social-link" aria-label="Instagram DPUPR Banten" target="_blank" rel="noopener noreferrer">
+                        <a href="https://instagram.com/dpupr.banten" 
+                           class="social-link" 
+                           aria-label="Instagram DPUPR Banten" 
+                           target="_blank" 
+                           rel="noopener noreferrer">
                             <i class="fab fa-instagram"></i>
                         </a>
-                        <a href="https://facebook.com/dpupr.banten" class="social-link" aria-label="Facebook DPUPR Banten" target="_blank" rel="noopener noreferrer">
+                        <a href="https://facebook.com/dpupr.banten" 
+                           class="social-link" 
+                           aria-label="Facebook DPUPR Banten" 
+                           target="_blank" 
+                           rel="noopener noreferrer">
                             <i class="fab fa-facebook-f"></i>
                         </a>
-                        <a href="https://youtube.com/@dpuprbanten" class="social-link" aria-label="YouTube DPUPR Banten" target="_blank" rel="noopener noreferrer">
+                        <a href="https://youtube.com/@dpuprbanten" 
+                           class="social-link" 
+                           aria-label="YouTube DPUPR Banten" 
+                           target="_blank" 
+                           rel="noopener noreferrer">
                             <i class="fab fa-youtube"></i>
                         </a>
                     </div>
                 </div>
 
+                <!-- Footer Menu -->
                 <div class="footer-section">
                     <h4>Menu</h4>
                     <nav class="footer-links" aria-label="Footer Menu">
@@ -276,6 +283,7 @@
                     </nav>
                 </div>
 
+                <!-- Footer Layanan -->
                 <div class="footer-section">
                     <h4>Layanan</h4>
                     <nav class="footer-links" aria-label="Footer Layanan">
@@ -284,6 +292,7 @@
                     </nav>
                 </div>
 
+                <!-- Footer Contact -->
                 <div class="footer-section">
                     <h4>Kontak</h4>
                     <address class="contact-info">
@@ -293,20 +302,140 @@
                         </div>
                         <div class="contact-item">
                             <i class="fas fa-envelope"></i>
-                            <div><a href="mailto:kontak@pupr.bantenprov.go.id">kontak@pupr.bantenprov.go.id</a></div>
+                            <div>
+                                <a href="mailto:kontak@pupr.bantenprov.go.id">kontak@pupr.bantenprov.go.id</a>
+                            </div>
                         </div>
                         <div class="contact-item">
                             <i class="fas fa-phone"></i>
-                            <div><a href="tel:+622541234456">(0254) 123 456</a></div>
+                            <div>
+                                <a href="tel:+622541234456">(0254) 123 456</a>
+                            </div>
                         </div>
                     </address>
                 </div>
             </div>
 
+            <!-- Footer Bottom -->
             <div class="footer-bottom">
                 <p>&copy; {{ date('Y') }} DPUPR Provinsi Banten. Platform Sistem Informasi Magang.</p>
             </div>
         </div>
     </footer>
+
+    <!-- Vanilla JavaScript -->
+    <script>
+        (function() {
+            'use strict';
+            
+            // DOM Elements
+            const header = document.getElementById('mainHeader');
+            const hamburgerBtn = document.getElementById('hamburgerBtn');
+            const closeMenuBtn = document.getElementById('closeMenuBtn');
+            const mobileMenu = document.getElementById('mobileMenu');
+            const menuOverlay = document.getElementById('menuOverlay');
+            const dropdownTrigger = document.getElementById('dropdownTrigger');
+            const dropdownContent = document.getElementById('dropdownContent');
+            const dropdownIcon = dropdownTrigger.querySelector('.dropdown-icon');
+            const mobileMenuLinks = document.querySelectorAll('.mobile-menu-link, .dropdown-item, .mobile-menu-actions a');
+            
+            // State
+            let lastScroll = 0;
+            let isMenuOpen = false;
+            let isDropdownOpen = false;
+            
+            // Header Scroll Effect
+            function handleScroll() {
+                const currentScroll = window.pageYOffset;
+                
+                // Add scrolled class
+                if (currentScroll > 50) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+                
+                // Hide header on scroll down
+                if (currentScroll > lastScroll && currentScroll > 200) {
+                    header.classList.add('hidden');
+                } else {
+                    header.classList.remove('hidden');
+                }
+                
+                lastScroll = currentScroll;
+            }
+            
+            // Open Mobile Menu
+            function openMobileMenu() {
+                isMenuOpen = true;
+                mobileMenu.classList.add('active');
+                menuOverlay.classList.add('active');
+                hamburgerBtn.setAttribute('aria-expanded', 'true');
+                document.body.style.overflow = 'hidden';
+            }
+            
+            // Close Mobile Menu
+            function closeMobileMenu() {
+                isMenuOpen = false;
+                mobileMenu.classList.remove('active');
+                menuOverlay.classList.remove('active');
+                hamburgerBtn.setAttribute('aria-expanded', 'false');
+                document.body.style.overflow = '';
+                
+                // Close dropdown juga
+                if (isDropdownOpen) {
+                    closeDropdown();
+                }
+            }
+            
+            // Toggle Dropdown
+            function toggleDropdown() {
+                isDropdownOpen = !isDropdownOpen;
+                
+                if (isDropdownOpen) {
+                    dropdownContent.classList.add('active');
+                    dropdownIcon.classList.add('rotated');
+                    dropdownTrigger.setAttribute('aria-expanded', 'true');
+                } else {
+                    closeDropdown();
+                }
+            }
+            
+            // Close Dropdown
+            function closeDropdown() {
+                isDropdownOpen = false;
+                dropdownContent.classList.remove('active');
+                dropdownIcon.classList.remove('rotated');
+                dropdownTrigger.setAttribute('aria-expanded', 'false');
+            }
+            
+            // Event Listeners
+            window.addEventListener('scroll', handleScroll, { passive: true });
+            
+            hamburgerBtn.addEventListener('click', openMobileMenu);
+            closeMenuBtn.addEventListener('click', closeMobileMenu);
+            menuOverlay.addEventListener('click', closeMobileMenu);
+            
+            dropdownTrigger.addEventListener('click', toggleDropdown);
+            
+            // Close menu saat link diklik
+            mobileMenuLinks.forEach(link => {
+                link.addEventListener('click', closeMobileMenu);
+            });
+            
+            // Close menu dengan ESC key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && isMenuOpen) {
+                    closeMobileMenu();
+                }
+            });
+            
+            // Prevent scroll behind menu
+            mobileMenu.addEventListener('touchmove', function(e) {
+                e.stopPropagation();
+            }, { passive: false });
+            
+        })();
+    </script>
 </body>
 </html>
