@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - SIMAGANG DPUPR Banten</title>
+    
+    <!-- Google Fonts - Distinctive Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    
+    <style>
+        :root {
+            /* Color System - Professional Government Theme */
+            --primary-navy: #0f172a;
+            --primary-blue: #3b82f6;
+            --primary-blue-light: #60a5fa;
+            --accent-orange: #f97316;
+            --accent-orange-light: #fb923c;
+            --success-green: #10b981;
+            --warning-yellow: #f59e0b;
+            --danger-red: #ef4444;
+            
+            /* Neutrals */
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --gray-900: #0f172a;
+            
+            /* Spacing */
+            --sidebar-width: 280px;
+            --topbar-height: 72px;
+            
+            /* Effects */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            
+            /* Typography */
+            --font-display: 'Space Mono', monospace;
+            --font-body: 'DM Sans', system-ui, -apple-system, sans-serif;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--font-body);
+            background: var(--gray-50);
+            color: var(--gray-900);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        /* ===== LAYOUT STRUCTURE ===== */
+        .dashboard-wrapper {
+            display: flex;
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, var(--primary-navy) 0%, #1e293b 100%);
+            color: white;
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .sidebar.collapsed {
+            width: 80px;
+        }
+        
+        /* Sidebar Header */
+        .sidebar-header {
+            padding: 24px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .sidebar-logo {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-orange) 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+        
+        .sidebar-brand {
+            flex: 1;
+            transition: opacity 0.2s;
+        }
+        
+        .sidebar.collapsed .sidebar-brand {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .sidebar-brand h1 {
+            font-family: var(--font-display);
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 2px;
+        }
+        
+        .sidebar-brand p {
+            font-size: 11px;
+            opacity: 0.7;
+            font-weight: 500;
+        }
+        
+        /* Sidebar Navigation */
+        .sidebar-nav {
+            flex: 1;
+            padding: 20px 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        
+        .sidebar-nav::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .sidebar-nav::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+        
+        .nav-section {
+            margin-bottom: 24px;
+        }
+        
+        .nav-section-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: rgba(255, 255, 255, 0.5);
+            padding: 0 20px;
+            margin-bottom: 8px;
+            transition: opacity 0.2s;
+        }
+        
+        .sidebar.collapsed .nav-section-title {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .nav-menu {
+            list-style: none;
+        }
+        
+        .nav-item {
+            margin: 2px 12px;
+        }
+        
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--primary-blue);
+            transform: scaleY(0);
+            transition: transform 0.2s ease;
+        }
+        
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .nav-link.active {
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.15) 0%, transparent 100%);
+            color: white;
+        }
+        
+        .nav-link.active::before {
+            transform: scaleY(1);
+        }
+        
+        .nav-icon {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .nav-text {
+            flex: 1;
+            white-space: nowrap;
+            transition: opacity 0.2s;
+        }
+        
+        .sidebar.collapsed .nav-text {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .nav-badge {
+            background: var(--danger-red);
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 10px;
+            min-width: 20px;
+            text-align: center;
+            transition: opacity 0.2s;
+        }
+        
+        .sidebar.collapsed .nav-badge {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        /* Sidebar Footer */
+        .sidebar-footer {
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-toggle {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+        
+        .sidebar-toggle:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        /* ===== MAIN CONTENT ===== */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .sidebar.collapsed ~ .main-content {
+            margin-left: 80px;
+        }
+        
+        /* ===== TOPBAR ===== */
+        .topbar {
+            height: var(--topbar-height);
+            background: white;
+            border-bottom: 1px solid var(--gray-200);
+            padding: 0 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+        
+        .page-title {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .page-title h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--gray-900);
+            line-height: 1.2;
+            margin-bottom: 2px;
+        }
+        
+        .page-breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--gray-500);
+        }
+        
+        .page-breadcrumb a {
+            color: var(--primary-blue);
+            text-decoration: none;
+        }
+        
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        /* Search Bar */
+        .topbar-search {
+            position: relative;
+        }
+        
+        .search-input {
+            width: 280px;
+            padding: 10px 16px 10px 44px;
+            border: 1px solid var(--gray-300);
+            border-radius: 10px;
+            font-size: 14px;
+            background: var(--gray-50);
+            transition: all 0.2s;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-400);
+            pointer-events: none;
+        }
+        
+        /* Notification Button */
+        .notification-btn {
+            position: relative;
+            width: 44px;
+            height: 44px;
+            border: 1px solid var(--gray-300);
+            background: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .notification-btn:hover {
+            background: var(--gray-50);
+            border-color: var(--gray-400);
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 20px;
+            height: 20px;
+            background: var(--danger-red);
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid white;
+        }
+        
+        /* User Profile */
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 12px;
+            border: 1px solid var(--gray-300);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .user-profile:hover {
+            background: var(--gray-50);
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-orange) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+        }
+        
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        
+        .user-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+        
+        .user-role {
+            font-size: 12px;
+            color: var(--gray-500);
+        }
+        
+        /* ===== CONTENT AREA ===== */
+        .content-area {
+            padding: 32px;
+            min-height: calc(100vh - var(--topbar-height));
+        }
+        
+        /* ===== STATS GRID ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--gray-200);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-blue) 0%, var(--accent-orange) 100%);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .stat-card:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+        
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        
+        .stat-icon.primary {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
+            color: var(--primary-blue);
+        }
+        
+        .stat-icon.success {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%);
+            color: var(--success-green);
+        }
+        
+        .stat-icon.warning {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(245, 158, 11, 0.05) 100%);
+            color: var(--warning-yellow);
+        }
+        
+        .stat-icon.danger {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.05) 100%);
+            color: var(--danger-red);
+        }
+        
+        .stat-trend {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+        
+        .stat-trend.up {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-green);
+        }
+        
+        .stat-trend.down {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger-red);
+        }
+        
+        .stat-body {
+            margin-bottom: 12px;
+        }
+        
+        .stat-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--gray-600);
+            margin-bottom: 8px;
+        }
+        
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--gray-900);
+            font-family: var(--font-display);
+            line-height: 1;
+        }
+        
+        .stat-footer {
+            font-size: 12px;
+            color: var(--gray-500);
+        }
+        
+        /* ===== CHART CARDS ===== */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+        
+        .chart-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--gray-200);
+        }
+        
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--gray-200);
+        }
+        
+        .chart-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+        
+        .chart-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .chart-btn {
+            padding: 8px 16px;
+            background: var(--gray-100);
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--gray-700);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .chart-btn:hover {
+            background: var(--gray-200);
+        }
+        
+        .chart-btn.active {
+            background: var(--primary-blue);
+            color: white;
+        }
+        
+        /* ===== RECENT ACTIVITIES ===== */
+        .activity-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--gray-200);
+        }
+        
+        .activity-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .activity-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+        
+        .activity-link {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--primary-blue);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .activity-item {
+            display: flex;
+            gap: 16px;
+            padding: 16px;
+            background: var(--gray-50);
+            border-radius: 12px;
+            transition: all 0.2s;
+        }
+        
+        .activity-item:hover {
+            background: var(--gray-100);
+        }
+        
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .activity-icon.new {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
+            color: var(--primary-blue);
+        }
+        
+        .activity-icon.approved {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%);
+            color: var(--success-green);
+        }
+        
+        .activity-content {
+            flex: 1;
+        }
+        
+        .activity-text {
+            font-size: 14px;
+            color: var(--gray-900);
+            margin-bottom: 4px;
+        }
+        
+        .activity-text strong {
+            font-weight: 600;
+        }
+        
+        .activity-meta {
+            font-size: 12px;
+            color: var(--gray-500);
+        }
+        
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1024px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .topbar {
+                padding: 0 16px;
+            }
+            
+            .topbar-search {
+                display: none;
+            }
+            
+            .content-area {
+                padding: 16px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .stat-card,
+        .chart-card,
+        .activity-card {
+            animation: fadeIn 0.5s ease-out backwards;
+        }
+        
+        .stat-card:nth-child(1) { animation-delay: 0.1s; }
+        .stat-card:nth-child(2) { animation-delay: 0.2s; }
+        .stat-card:nth-child(3) { animation-delay: 0.3s; }
+        .stat-card:nth-child(4) { animation-delay: 0.4s; }
+        
+        [x-cloak] {
+            display: none !important;
+        }
+    </style>
+</head>
+<body x-data="dashboardApp()" x-cloak>
+    <div class="dashboard-wrapper">
+        <!-- Sidebar -->
+        <aside class="sidebar" :class="{ 'collapsed': sidebarCollapsed, 'mobile-open': mobileSidebarOpen }">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <i class="fas fa-building"></i>
+                </div>
+                <div class="sidebar-brand">
+                    <h1>SIMAGANG</h1>
+                    <p>DPUPR Provinsi Banten</p>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Main Menu</div>
+                    <ul class="nav-menu">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link active">
+                                <span class="nav-icon"><i class="fas fa-home"></i></span>
+                                <span class="nav-text">Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <span class="nav-icon"><i class="fas fa-clock"></i></span>
+                                <span class="nav-text">Validasi Pengajuan</span>
+                                <span class="nav-badge" x-text="stats.pending"></span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">Data Management</div>
+                    <ul class="nav-menu">
+                        <li class="nav-item" x-show="userRole === 'superadmin'">
+                            <a href="#" class="nav-link">
+                                <span class="nav-icon"><i class="fas fa-user-shield"></i></span>
+                                <span class="nav-text">Kelola Admin</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <span class="nav-icon"><i class="fas fa-school"></i></span>
+                                <span class="nav-text">Data Sekolah</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <span class="nav-icon"><i class="fas fa-users"></i></span>
+                                <span class="nav-text">Data Peserta</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <span class="nav-icon"><i class="fas fa-file-pdf"></i></span>
+                                <span class="nav-text">Dokumen ACC</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">Reporting</div>
+                    <ul class="nav-menu">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <span class="nav-icon"><i class="fas fa-chart-bar"></i></span>
+                                <span class="nav-text">Laporan Statistik</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <span class="nav-icon"><i class="fas fa-download"></i></span>
+                                <span class="nav-text">Export Data</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">Settings</div>
+                    <ul class="nav-menu">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <span class="nav-icon"><i class="fas fa-cog"></i></span>
+                                <span class="nav-text">Pengaturan</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <span class="nav-icon"><i class="fas fa-sign-out-alt"></i></span>
+                                <span class="nav-text">Logout</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <button class="sidebar-toggle" @click="sidebarCollapsed = !sidebarCollapsed">
+                    <i class="fas" :class="sidebarCollapsed ? 'fa-angles-right' : 'fa-angles-left'"></i>
+                    <span x-show="!sidebarCollapsed">Collapse</span>
+                </button>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Topbar -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <div class="page-title">
+                        <h1>Dashboard Overview</h1>
+                        <div class="page-breadcrumb">
+                            <a href="#">Home</a>
+                            <i class="fas fa-chevron-right"></i>
+                            <span>Dashboard</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="topbar-right">
+                    <div class="topbar-search">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" class="search-input" placeholder="Search...">
+                    </div>
+                    
+                    <button class="notification-btn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" x-text="notifications"></span>
+                    </button>
+                    
+                    <div class="user-profile">
+                        <div class="user-avatar" x-text="userInitials"></div>
+                        <div class="user-info">
+                            <div class="user-name" x-text="userName"></div>
+                            <div class="user-role" x-text="userRole === 'superadmin' ? 'Super Admin' : 'Admin'"></div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Content Area -->
+            <main class="content-area">
+                <!-- Stats Grid -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon warning">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="stat-trend up">
+                                <i class="fas fa-arrow-up"></i>
+                                <span>12%</span>
+                            </div>
+                        </div>
+                        <div class="stat-body">
+                            <div class="stat-label">Pengajuan Pending</div>
+                            <div class="stat-value" x-text="stats.pending"></div>
+                        </div>
+                        <div class="stat-footer">Menunggu validasi admin</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon success">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="stat-trend up">
+                                <i class="fas fa-arrow-up"></i>
+                                <span>8%</span>
+                            </div>
+                        </div>
+                        <div class="stat-body">
+                            <div class="stat-label">Pengajuan ACC</div>
+                            <div class="stat-value" x-text="stats.acc"></div>
+                        </div>
+                        <div class="stat-footer">Total disetujui</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon danger">
+                                <i class="fas fa-times-circle"></i>
+                            </div>
+                            <div class="stat-trend down">
+                                <i class="fas fa-arrow-down"></i>
+                                <span>3%</span>
+                            </div>
+                        </div>
+                        <div class="stat-body">
+                            <div class="stat-label">Pengajuan Reject</div>
+                            <div class="stat-value" x-text="stats.reject"></div>
+                        </div>
+                        <div class="stat-footer">Total ditolak</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon primary">
+                                <i class="fas fa-school"></i>
+                            </div>
+                            <div class="stat-trend up">
+                                <i class="fas fa-arrow-up"></i>
+                                <span>5%</span>
+                            </div>
+                        </div>
+                        <div class="stat-body">
+                            <div class="stat-label">Total Sekolah</div>
+                            <div class="stat-value" x-text="stats.totalSekolah"></div>
+                        </div>
+                        <div class="stat-footer">Sekolah terdaftar</div>
+                    </div>
+                </div>
+                
+                <!-- Charts Grid -->
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 class="chart-title">Statistik Pengajuan</h3>
+                            <div class="chart-actions">
+                                <button class="chart-btn active">Bulan Ini</button>
+                                <button class="chart-btn">3 Bulan</button>
+                                <button class="chart-btn">Tahun Ini</button>
+                            </div>
+                        </div>
+                        <canvas id="submissionsChart" height="80"></canvas>
+                    </div>
+                    
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 class="chart-title">Status Pengajuan</h3>
+                        </div>
+                        <canvas id="statusChart" height="180"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Recent Activities -->
+                <div class="activity-card">
+                    <div class="activity-header">
+                        <h3 class="activity-title">Aktivitas Terbaru</h3>
+                        <a href="#" class="activity-link">
+                            Lihat Semua
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                    
+                    <div class="activity-list">
+                        <template x-for="activity in recentActivities" :key="activity.id">
+                            <div class="activity-item">
+                                <div class="activity-icon" :class="activity.type">
+                                    <i class="fas" :class="activity.icon"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-text" x-html="activity.text"></div>
+                                    <div class="activity-meta" x-text="activity.time"></div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <script>
+        function dashboardApp() {
+            return {
+                sidebarCollapsed: false,
+                mobileSidebarOpen: false,
+                userName: 'Admin DPUPR',
+                userRole: 'superadmin',
+                notifications: 5,
+                
+                stats: {
+                    pending: 24,
+                    acc: 156,
+                    reject: 12,
+                    totalSekolah: 89
+                },
+                
+                recentActivities: [
+                    {
+                        id: 1,
+                        type: 'new',
+                        icon: 'fa-file-alt',
+                        text: '<strong>SMK Negeri 1 Serang</strong> mengajukan permohonan magang untuk 15 siswa',
+                        time: '5 menit yang lalu'
+                    },
+                    {
+                        id: 2,
+                        type: 'approved',
+                        icon: 'fa-check',
+                        text: '<strong>SMA Negeri 3 Cilegon</strong> pengajuan magang telah disetujui',
+                        time: '1 jam yang lalu'
+                    },
+                    {
+                        id: 3,
+                        type: 'new',
+                        icon: 'fa-file-alt',
+                        text: '<strong>SMK Bina Karya</strong> mengajukan permohonan magang untuk 20 siswa',
+                        time: '2 jam yang lalu'
+                    },
+                    {
+                        id: 4,
+                        type: 'approved',
+                        icon: 'fa-check',
+                        text: '<strong>SMA Negeri 1 Pandeglang</strong> pengajuan magang telah disetujui',
+                        time: '3 jam yang lalu'
+                    }
+                ],
+                
+                get userInitials() {
+                    return this.userName.split(' ').map(n => n[0]).join('').substring(0, 2);
+                },
+                
+                init() {
+                    this.initCharts();
+                },
+                
+                initCharts() {
+                    // Submissions Chart
+                    const submissionsCtx = document.getElementById('submissionsChart');
+                    if (submissionsCtx) {
+                        new Chart(submissionsCtx, {
+                            type: 'line',
+                            data: {
+                                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                                datasets: [{
+                                    label: 'Pengajuan',
+                                    data: [12, 19, 15, 25, 22, 30, 28, 35, 32, 38, 42, 45],
+                                    borderColor: '#3b82f6',
+                                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                    tension: 0.4,
+                                    fill: true
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: true,
+                                plugins: {
+                                    legend: {
+                                        display: false
+                                    }
+                                },
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        grid: {
+                                            color: '#f1f5f9'
+                                        }
+                                    },
+                                    x: {
+                                        grid: {
+                                            display: false
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    }
+                    
+                    // Status Chart
+                    const statusCtx = document.getElementById('statusChart');
+                    if (statusCtx) {
+                        new Chart(statusCtx, {
+                            type: 'doughnut',
+                            data: {
+                                labels: ['ACC', 'Pending', 'Reject'],
+                                datasets: [{
+                                    data: [this.stats.acc, this.stats.pending, this.stats.reject],
+                                    backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+                                    borderWidth: 0
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: true,
+                                plugins: {
+                                    legend: {
+                                        position: 'bottom'
+                                    }
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>
